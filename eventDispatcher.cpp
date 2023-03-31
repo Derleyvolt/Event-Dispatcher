@@ -6,44 +6,68 @@
 #include <functional>
 #include <algorithm>
 
-// Essa classe, na prática, é uma interface onde outros eventos implementam ela
-// e adicionam novos membros, dependendo do tipo de evento..
 class Event {
 public:
-    Event(std::string eventType) : eventType(eventType) {
+    Event() {
+
     }
 
     std::string getType() const {
         return this->eventType;
     }
 
-private:
+protected:
     std::string eventType;
 };
 
-class Callback {
+class ClickEvent : public Event {
 public:
-    Callback(std::function<void(Event)> f) {
+    ClickEvent(std::string eventType, int x, int y) : x(x), y(y) {
+        this->eventType = eventType;
     }
-    
-    void operator()(Event e) {
-        this->f(e);
+
+    int getX() const {
+        return x;
+    }
+
+    int getY() const {
+        return y;
+    }
+
+    void showPoint() {
+        std::cout << "x: " << x << "  y: " << y << std::endl;
     }
 
 private:
-    std::function<void(Event)> f;
+    int x;
+    int y;
+};
+
+class OnChangeEvent : public Event {
+public:
+    OnChangeEvent(std::string eventType, std::string currentText) : text(currentText) {
+        this->eventType = eventType;
+    }
+
+    std::string getText() const {
+        return this->text;
+    }
+
+private:
+    std::string text;
 };
 
 class Dispatcher {
+using Callback = std::function<void(Event*)>;
+
 public:
-    // O parâmetro weigth serve para dá prioridade aos eventos
     void addListener(std::string eventType, Callback callback, double weigth = 1) {
         this->listeners.insert({eventType, std::make_pair(callback, weigth)});
     }
 
     // notifica/trigga todos os listeners de um evento específico
-    void notify(Event e) {
-        auto listeners = this->orderListeners(e.getType());
+    void notify(Event* e) {
+        auto listeners = this->orderListeners(e->getType());
 
         for(auto func : listeners) {
             func(e);
@@ -53,7 +77,7 @@ public:
 private:
     using listenerPair = std::pair<Callback, double>;
 
-    std::unordered_map<std::string, listenerPair> listeners;
+    std::unordered_multimap<std::string, listenerPair> listeners;
 
     // ordena os listeners por peso
     std::vector<Callback> orderListeners(std::string eventType) {
@@ -80,5 +104,35 @@ private:
 };
 
 int main() {
+    Event* click  = new ClickEvent("click", 1, 2);
+    Event* change = new OnChangeEvent("onChange", "Eu juro solenemente nao fazer nada de bom!");
+    Dispatcher emitter;
 
+    emitter.addListener("click", [](Event* e) {
+        ClickEvent* ce = (ClickEvent*)e;
+        std::cout << "Evento 1" << std::endl;
+        ce->showPoint();
+    }, 5);
+
+    emitter.addListener("click", [](Event* e) {
+        ClickEvent* ce = (ClickEvent*)e;
+        std::cout << "Evento 2" << std::endl;
+        ce->showPoint();
+    }, 10);
+
+    emitter.addListener("click", [](Event* e) {
+        ClickEvent* ce = (ClickEvent*)e;
+        std::cout << "Evento 3" << std::endl;
+        ce->showPoint();
+    }, 15);
+
+    emitter.addListener("onChange", [](Event* e) {
+        OnChangeEvent* oce = (OnChangeEvent*)e;
+        std::cout << "text: " << oce->getText() << std::endl;
+    }, 20);
+
+    // simulando o evento de click e onChange (referente a um button e um input, respectivamente, por exemplo)
+    emitter.notify(click);
+    emitter.notify(change);
+    return 0;
 }
