@@ -129,7 +129,7 @@ int main() {
     emitter.addListener("onChange", [](Event* e) {
         OnChangeEvent* oce = (OnChangeEvent*)e;
         std::cout << "text: " << oce->getText() << std::endl;
-    }, 20);
+    });
 
     // simulando o evento de click e onChange (referente a um button e um input, respectivamente, por exemplo)
     emitter.notify(click);
