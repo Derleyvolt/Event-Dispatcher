@@ -61,7 +61,7 @@ class Dispatcher {
 using Callback = std::function<void(Event*)>;
 
 public:
-    void addListener(std::string eventType, Callback callback, double weigth = 1) {
+    void addListener(std::string eventType, Callback callback, double weigth = 0.1) {
         this->listeners.insert({eventType, std::make_pair(callback, weigth)});
     }
 
