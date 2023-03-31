@@ -36,7 +36,8 @@ private:
 
 class Dispatcher {
 public:
-    void addListener(std::string eventType, Callback callback, double weigth) {
+    // O parâmetro weigth serve para dá prioridade aos eventos
+    void addListener(std::string eventType, Callback callback, double weigth = 1) {
         this->listeners.insert({eventType, std::make_pair(callback, weigth)});
     }
 
