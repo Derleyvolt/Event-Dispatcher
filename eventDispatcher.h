@@ -1,13 +1,13 @@
+#include <queue>
 #include <vector>
 #include <string>
-#include <unordered_map>
-#include <functional>
 #include <algorithm>
+#include <functional>
+#include <unordered_map>
 
 class Event {
 public:
     Event() {
-
     }
 
     std::string getType() const {
@@ -19,11 +19,11 @@ protected:
 };
 
 using Callback      = std::function<void(Event*)>;
-using listenerPair  = std::pair<Callback, double>;
+using listenerPair  = std::pair<Callback, int>;
 
 class Dispatcher {
 public:
-    void addListener(std::string eventType, Callback callback, double weigth = 0.1);
+    void addListener(std::string eventType, Callback callback, int weigth = 1);
 
     void notify(Event* e);
     void notify(std::string eventType);
@@ -32,5 +32,5 @@ private:
     std::unordered_multimap<std::string, listenerPair> listeners;
 
     // ordena os listeners por peso
-    std::vector<Callback> orderListeners(std::string eventType);
+    std::priority_queue<int, Callback> orderListeners(std::string eventType);
 };
